@@ -7,34 +7,46 @@ export const socket = io(SOCKET_URL, {
   withCredentials: true
 });
 
-socket.on('room-created', (data) => {
+// Event handler functions (for proper cleanup)
+const onRoomCreated = (data) => {
   roomCode.value = data.roomCode;
   isHost.value = true;
   players.value = [data.playerName];
   currentView.value = 'lobby';
-});
+};
 
-socket.on('room-joined', (data) => {
+const onRoomJoined = (data) => {
   roomCode.value = data.roomCode;
   players.value = data.players;
   currentView.value = 'lobby';
-});
+};
 
-socket.on('players-updated', (data) => {
+const onPlayersUpdated = (data) => {
   players.value = data.players;
-});
+};
+
+socket.on('room-created', onRoomCreated);
+socket.on('room-joined', onRoomJoined);
+socket.on('players-updated', onPlayersUpdated);
 
 let countdownInterval = null;
 let countdownTimeout = null;
 
-socket.on('game-started', (data) => {
-  // Clear any existing countdown interval/timeout
+// Cleanup function for timers
+export function cleanupTimers() {
   if (countdownInterval) {
     clearInterval(countdownInterval);
+    countdownInterval = null;
   }
   if (countdownTimeout) {
     clearTimeout(countdownTimeout);
+    countdownTimeout = null;
   }
+}
+
+const onGameStarted = (data) => {
+  // Clear any existing countdown interval/timeout
+  cleanupTimers();
 
   role.value = data.role;
   countdown.value = 3;
@@ -50,8 +62,21 @@ socket.on('game-started', (data) => {
       }, 1200);
     }
   }, 1200);
-});
+};
 
-socket.on('error', (message) => {
+const onError = (message) => {
   alert(message);
-});
+};
+
+socket.on('game-started', onGameStarted);
+socket.on('error', onError);
+
+// Cleanup function to remove all listeners
+export function cleanupSocketListeners() {
+  socket.off('room-created', onRoomCreated);
+  socket.off('room-joined', onRoomJoined);
+  socket.off('players-updated', onPlayersUpdated);
+  socket.off('game-started', onGameStarted);
+  socket.off('error', onError);
+  cleanupTimers();
+}

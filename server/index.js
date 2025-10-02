@@ -6,9 +6,11 @@ const { createRoom, joinRoom, getRoom, removePlayer, selectImposter, isHost } = 
 const app = express();
 const httpServer = createServer(app);
 
-// Rate limiting map: socketId -> last action timestamp
+// Rate limiting map: socketId -> { action -> last timestamp }
 const rateLimitMap = new Map();
-const RATE_LIMIT_MS = 2000; // 2 seconds between room creations
+const RATE_LIMIT_CREATE = 2000; // 2 seconds between room creations
+const RATE_LIMIT_JOIN = 1000; // 1 second between join attempts
+const RATE_LIMIT_START = 1000; // 1 second between start attempts
 
 const io = new Server(httpServer, {
   cors: {
@@ -18,22 +20,34 @@ const io = new Server(httpServer, {
   }
 });
 
+// Helper function for rate limiting
+function checkRateLimit(socket, action, limitMs) {
+  const now = Date.now();
+  const socketLimits = rateLimitMap.get(socket.id) || {};
+  const lastAction = socketLimits[action];
+
+  if (lastAction && now - lastAction < limitMs) {
+    socket.emit('error', 'Too many requests. Please wait.');
+    return false;
+  }
+
+  socketLimits[action] = now;
+  rateLimitMap.set(socket.id, socketLimits);
+  return true;
+}
+
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
+  // Initialize rate limit tracking for this socket
+  rateLimitMap.set(socket.id, {});
+
   socket.on('create-room', (playerName) => {
-    // Rate limiting
-    const now = Date.now();
-    const lastAction = rateLimitMap.get(socket.id);
-    if (lastAction && now - lastAction < RATE_LIMIT_MS) {
-      socket.emit('error', 'Too many requests. Please wait.');
-      return;
-    }
-    rateLimitMap.set(socket.id, now);
+    if (!checkRateLimit(socket, 'create-room', RATE_LIMIT_CREATE)) return;
 
     const roomCode = createRoom(playerName);
     if (!roomCode) {
-      socket.emit('error', 'Invalid name. Use 1-20 alphanumeric characters.');
+      socket.emit('error', 'Cannot create room. Server may be at capacity or name is invalid.');
       return;
     }
 
@@ -45,6 +59,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join-room', ({ roomCode, playerName }) => {
+    if (!checkRateLimit(socket, 'join-room', RATE_LIMIT_JOIN)) return;
+
     const existingRoom = getRoom(roomCode);
 
     if (!existingRoom) {
@@ -70,6 +86,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('start-game', (roomCode) => {
+    if (!checkRateLimit(socket, 'start-game', RATE_LIMIT_START)) return;
+
     const room = getRoom(roomCode);
     if (!room) return;
 
@@ -109,8 +127,10 @@ io.on('connection', (socket) => {
 // Cleanup rate limit map periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [socketId, timestamp] of rateLimitMap.entries()) {
-    if (now - timestamp > 60000) { // Remove entries older than 1 minute
+  for (const [socketId, actions] of rateLimitMap.entries()) {
+    // Check if all actions are older than 2 minutes
+    const allOld = Object.values(actions).every(timestamp => now - timestamp > 120000);
+    if (allOld) {
       rateLimitMap.delete(socketId);
     }
   }

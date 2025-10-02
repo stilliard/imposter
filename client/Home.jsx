@@ -1,11 +1,22 @@
 import { createName, joinName, roomCode, currentView, isHost } from './signals';
 import { socket } from './socket';
 
+const MAX_NAME_LENGTH = 20;
+const ROOM_CODE_LENGTH = 8;
+
+function validateRoomCode(code) {
+  if (!code || typeof code !== 'string') return false;
+  if (code.length !== ROOM_CODE_LENGTH) return false;
+  if (!/^[A-Z0-9]+$/.test(code)) return false;
+  return true;
+}
+
 export default function Home() {
   const urlParams = new URLSearchParams(window.location.search);
-  const urlRoomCode = urlParams.get('room');
+  const urlRoomCode = urlParams.get('room')?.toUpperCase();
 
-  if (urlRoomCode && !roomCode.value) {
+  // Validate room code from URL to prevent XSS
+  if (urlRoomCode && validateRoomCode(urlRoomCode) && !roomCode.value) {
     roomCode.value = urlRoomCode;
   }
 
@@ -16,8 +27,13 @@ export default function Home() {
 
   const joinRoom = () => {
     if (!joinName.value.trim() || !roomCode.value.trim()) return;
+    const code = roomCode.value.trim().toUpperCase();
+    if (!validateRoomCode(code)) {
+      alert('Invalid room code. Must be 8 alphanumeric characters.');
+      return;
+    }
     socket.emit('join-room', {
-      roomCode: roomCode.value.trim().toUpperCase(),
+      roomCode: code,
       playerName: joinName.value.trim()
     });
   };
@@ -38,6 +54,7 @@ export default function Home() {
               placeholder="Your name"
               value={joinName.value}
               onInput={(e) => joinName.value = e.target.value}
+              maxLength={MAX_NAME_LENGTH}
             />
             <button onClick={joinRoom}>Join</button>
           </div>
@@ -59,6 +76,7 @@ export default function Home() {
             placeholder="Your name"
             value={createName.value}
             onInput={(e) => createName.value = e.target.value}
+            maxLength={MAX_NAME_LENGTH}
           />
           <button onClick={createRoom}>Create</button>
         </div>
@@ -70,12 +88,14 @@ export default function Home() {
             placeholder="Your name"
             value={joinName.value}
             onInput={(e) => joinName.value = e.target.value}
+            maxLength={MAX_NAME_LENGTH}
           />
           <input
             type="text"
             placeholder="Room code"
             value={roomCode.value}
             onInput={(e) => roomCode.value = e.target.value.toUpperCase()}
+            maxLength={ROOM_CODE_LENGTH}
           />
           <button onClick={joinRoom}>Join</button>
         </div>
