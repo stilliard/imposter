@@ -59,6 +59,35 @@ npm run server:prod
 6. **Serve built files**: Use nginx/Apache to serve `dist/` folder
 7. **Run server**: Use PM2 or systemd to run `npm run server:prod`
 
+### Systemd Service
+
+Create `/etc/systemd/system/imposter.service`:
+
+```ini
+[Unit]
+Description=Imposter Game Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/imposter
+Environment="NODE_ENV=production"
+Environment="PORT=3001"
+Environment="CORS_ORIGIN=https://yourdomain.com"
+ExecStart=/usr/bin/npm run server:prod
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then enable and start:
+```bash
+sudo systemctl enable imposter
+sudo systemctl start imposter
+```
+
 ### Nginx Example
 
 ```nginx
