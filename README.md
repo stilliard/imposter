@@ -134,4 +134,4 @@ WebSockets work fine through Cloudflare. No special configuration needed.
 
 ## License
 
-ISC
+MIT
