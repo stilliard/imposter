@@ -5,6 +5,7 @@ const rooms = new Map();
 const MAX_PLAYERS = 10;
 const MAX_NAME_LENGTH = 20;
 const ROOM_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+const EMPTY_ROOM_TIMEOUT = 5 * 60 * 1000; // 5 minutes for empty rooms
 const MAX_ROOM_AGE = 2 * 60 * 60 * 1000; // 2 hours max age
 const MAX_ROOMS = 1000; // Maximum number of concurrent rooms
 const ROOM_CODE_LENGTH = 8;
@@ -99,9 +100,9 @@ function removePlayer(socketId) {
       room.sockets.delete(socketId);
       room.players = room.players.filter(p => p !== playerName);
 
-      if (room.players.length === 0) {
-        rooms.delete(roomCode);
-      }
+      // Don't immediately delete empty rooms - give them a grace period
+      // Update lastActivity so cleanup function can handle it
+      room.lastActivity = Date.now();
 
       return { roomCode, room };
     }
@@ -123,9 +124,13 @@ function selectImposters(roomCode) {
 function cleanupStaleRooms() {
   const now = Date.now();
   for (const [roomCode, room] of rooms.entries()) {
+    const isEmptyRoom = room.players.length === 0;
+    const timeout = isEmptyRoom ? EMPTY_ROOM_TIMEOUT : ROOM_TIMEOUT;
+
     // Clean up rooms that are inactive OR have exceeded max age
-    if (now - room.lastActivity > ROOM_TIMEOUT || now - room.createdAt > MAX_ROOM_AGE) {
-      console.log(`Cleaning up stale room: ${roomCode}`);
+    // Empty rooms get a shorter timeout (5 min) vs active rooms (30 min)
+    if (now - room.lastActivity > timeout || now - room.createdAt > MAX_ROOM_AGE) {
+      console.log(`Cleaning up ${isEmptyRoom ? 'empty' : 'stale'} room: ${roomCode}`);
       rooms.delete(roomCode);
     }
   }
