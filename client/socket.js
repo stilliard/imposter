@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { roomCode, currentView, players, isHost, role, countdown, totalImposters } from './signals';
+import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList } from './signals';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
@@ -50,6 +50,7 @@ const onGameStarted = (data) => {
 
   role.value = data.role;
   totalImposters.value = data.totalImposters || 1;
+  impostersList.value = data.imposters || [];
   countdown.value = 3;
   currentView.value = 'countdown';
 

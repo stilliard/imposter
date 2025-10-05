@@ -111,9 +111,12 @@ io.on('connection', (socket) => {
     const imposters = selectImposters(roomCode);
 
     for (const [sid, playerName] of room.sockets) {
+      const isImposter = imposters.includes(playerName);
       io.to(sid).emit('game-started', {
-        role: imposters.includes(playerName) ? 'imposter' : 'player',
-        totalImposters: imposters.length
+        role: isImposter ? 'imposter' : 'player',
+        totalImposters: imposters.length,
+        // Only send imposters list to imposters themselves
+        imposters: isImposter ? imposters.filter(name => name !== playerName) : []
       });
     }
   });

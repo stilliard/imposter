@@ -1,4 +1,4 @@
-import { roomCode, players, isHost, currentView, role, countdown, totalImposters } from './signals';
+import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList } from './signals';
 import { socket } from './socket';
 
 export default function Room() {
@@ -28,6 +28,11 @@ export default function Room() {
             ? `[!] Eliminate the players without getting caught!${totalImposters.value > 1 ? ' Work with your fellow imposters!' : ''}`
             : `[OK] Find the ${totalImposters.value > 1 ? totalImposters.value + ' imposters' : 'imposter'} among you!`}
         </p>
+        {role.value === 'imposter' && impostersList.value.length > 0 && (
+          <p class={role.value} style="margin-top: 1rem; font-size: 0.7rem;">
+            Fellow {impostersList.value.length > 1 ? 'imposters' : 'imposter'}: {impostersList.value.join(', ')}
+          </p>
+        )}
       </div>
     );
   }
