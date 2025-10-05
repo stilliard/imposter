@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList, revealedImposters } from './signals';
+import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters } from './signals';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
@@ -12,12 +12,16 @@ const onRoomCreated = (data) => {
   roomCode.value = data.roomCode;
   isHost.value = true;
   players.value = [data.playerName];
+  maxPlayers.value = data.maxPlayers || 10;
+  numImposters.value = data.numImposters || 1;
   currentView.value = 'lobby';
 };
 
 const onRoomJoined = (data) => {
   roomCode.value = data.roomCode;
   players.value = data.players;
+  maxPlayers.value = data.maxPlayers || 10;
+  numImposters.value = data.numImposters || 1;
   currentView.value = 'lobby';
 };
 
@@ -83,10 +87,16 @@ const onGameReset = () => {
   cleanupTimers();
 };
 
+const onSettingsUpdated = (data) => {
+  maxPlayers.value = data.maxPlayers;
+  numImposters.value = data.numImposters;
+};
+
 socket.on('game-started', onGameStarted);
 socket.on('error', onError);
 socket.on('imposters-revealed', onImpostersRevealed);
 socket.on('game-reset', onGameReset);
+socket.on('settings-updated', onSettingsUpdated);
 
 // Cleanup function to remove all listeners
 export function cleanupSocketListeners() {
@@ -97,5 +107,6 @@ export function cleanupSocketListeners() {
   socket.off('error', onError);
   socket.off('imposters-revealed', onImpostersRevealed);
   socket.off('game-reset', onGameReset);
+  socket.off('settings-updated', onSettingsUpdated);
   cleanupTimers();
 }

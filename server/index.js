@@ -60,7 +60,12 @@ io.on('connection', (socket) => {
     room.sockets.set(socket.id, playerName);
 
     socket.join(roomCode);
-    socket.emit('room-created', { roomCode, playerName });
+    socket.emit('room-created', {
+      roomCode,
+      playerName,
+      maxPlayers: room.maxPlayers,
+      numImposters: room.numImposters
+    });
   });
 
   socket.on('join-room', ({ roomCode, playerName }) => {
@@ -86,7 +91,12 @@ io.on('connection', (socket) => {
     }
 
     socket.join(roomCode);
-    socket.emit('room-joined', { roomCode, players: room.players });
+    socket.emit('room-joined', {
+      roomCode,
+      players: room.players,
+      maxPlayers: room.maxPlayers,
+      numImposters: room.numImposters
+    });
     socket.to(roomCode).emit('players-updated', { players: room.players });
   });
 
@@ -146,6 +156,32 @@ io.on('connection', (socket) => {
     delete room.imposters;
 
     io.to(roomCode).emit('game-reset');
+  });
+
+  socket.on('update-settings', (data) => {
+    const { roomCode, maxPlayers, numImposters } = data;
+    const room = getRoom(roomCode);
+    if (!room) return;
+
+    // Validate that the socket is the host
+    const playerName = room.sockets.get(socket.id);
+    if (!isHost(roomCode, playerName)) {
+      socket.emit('error', 'Only the host can change settings');
+      return;
+    }
+
+    // Validate and update settings
+    const validMaxPlayers = Math.max(2, Math.min(10, parseInt(maxPlayers) || 10));
+    const validNumImposters = Math.max(1, Math.min(Math.floor(validMaxPlayers / 2), parseInt(numImposters) || 1));
+
+    room.maxPlayers = validMaxPlayers;
+    room.numImposters = validNumImposters;
+
+    // Broadcast updated settings to all players
+    io.to(roomCode).emit('settings-updated', {
+      maxPlayers: validMaxPlayers,
+      numImposters: validNumImposters
+    });
   });
 
   socket.on('disconnect', () => {

@@ -442,6 +442,47 @@ button:disabled {
   }
 }
 
+.settings-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.settings-row select {
+  flex: 1;
+}
+
+.fellow-imposters {
+  margin-top: 1rem;
+  font-size: 0.7rem;
+}
+
+.revealed-imposters {
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  color: #ff6680;
+  border: 2px solid #ff0033;
+  padding: 1rem;
+}
+
+.reveal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.reveal-actions button {
+  flex: 1;
+}
+
+.settings-display {
+  font-size: 0.6rem;
+  color: #16213e;
+  margin-bottom: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .blocks {
     grid-template-columns: 1fr;
