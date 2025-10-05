@@ -36,11 +36,14 @@ function validatePlayerName(name) {
   return true;
 }
 
-function createRoom(playerName, maxPlayers = MAX_PLAYERS) {
+function createRoom(playerName, maxPlayers = MAX_PLAYERS, numImposters = 1) {
   if (!validatePlayerName(playerName)) return null;
 
   // Validate maxPlayers (must be between 2 and MAX_PLAYERS)
   const validMaxPlayers = Math.max(2, Math.min(MAX_PLAYERS, parseInt(maxPlayers) || MAX_PLAYERS));
+
+  // Validate numImposters (must be between 1 and half of maxPlayers)
+  const validNumImposters = Math.max(1, Math.min(Math.floor(validMaxPlayers / 2), parseInt(numImposters) || 1));
 
   // Check if we've hit the maximum rooms limit
   if (rooms.size >= MAX_ROOMS) {
@@ -55,7 +58,8 @@ function createRoom(playerName, maxPlayers = MAX_PLAYERS) {
     sockets: new Map(),
     createdAt: Date.now(),
     lastActivity: Date.now(),
-    maxPlayers: validMaxPlayers
+    maxPlayers: validMaxPlayers,
+    numImposters: validNumImposters
   });
   return roomCode;
 }
@@ -105,13 +109,15 @@ function removePlayer(socketId) {
   return null;
 }
 
-function selectImposter(roomCode) {
+function selectImposters(roomCode) {
   const room = rooms.get(roomCode);
-  if (!room) return null;
+  if (!room) return [];
 
   room.lastActivity = Date.now();
-  const randomIndex = Math.floor(Math.random() * room.players.length);
-  return room.players[randomIndex];
+
+  const numToSelect = Math.min(room.numImposters || 1, room.players.length - 1);
+  const shuffled = [...room.players].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, numToSelect);
 }
 
 function cleanupStaleRooms() {
@@ -138,7 +144,7 @@ module.exports = {
   joinRoom,
   getRoom,
   removePlayer,
-  selectImposter,
+  selectImposters,
   isHost,
   MAX_NAME_LENGTH
 };

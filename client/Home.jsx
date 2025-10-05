@@ -1,4 +1,4 @@
-import { createName, joinName, roomCode, currentView, isHost, maxPlayers } from './signals';
+import { createName, joinName, roomCode, currentView, isHost, maxPlayers, numImposters } from './signals';
 import { socket } from './socket';
 
 const MAX_NAME_LENGTH = 20;
@@ -24,7 +24,8 @@ export default function Home() {
     if (!createName.value.trim()) return;
     socket.emit('create-room', {
       playerName: createName.value.trim(),
-      maxPlayers: maxPlayers.value
+      maxPlayers: maxPlayers.value,
+      numImposters: numImposters.value
     });
   };
 
@@ -83,7 +84,15 @@ export default function Home() {
           />
           <select
             value={maxPlayers.value}
-            onChange={(e) => maxPlayers.value = parseInt(e.target.value)}
+            onChange={(e) => {
+              const newMax = parseInt(e.target.value);
+              maxPlayers.value = newMax;
+              // Cap imposters at half the max players (minimum 1)
+              const maxImposters = Math.max(1, Math.floor(newMax / 2));
+              if (numImposters.value > maxImposters) {
+                numImposters.value = maxImposters;
+              }
+            }}
           >
             <option value={2}>2 players max</option>
             <option value={3}>3 players max</option>
@@ -94,6 +103,16 @@ export default function Home() {
             <option value={8}>8 players max</option>
             <option value={9}>9 players max</option>
             <option value={10}>10 players max</option>
+          </select>
+          <select
+            value={numImposters.value}
+            onChange={(e) => numImposters.value = parseInt(e.target.value)}
+          >
+            {Array.from({ length: Math.max(1, Math.floor(maxPlayers.value / 2)) }, (_, i) => i + 1).map(num => (
+              <option key={num} value={num}>
+                {num} imposter{num > 1 ? 's' : ''}
+              </option>
+            ))}
           </select>
           <button onClick={createRoom}>Create</button>
         </div>

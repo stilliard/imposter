@@ -9,3 +9,5 @@ export const isHost = signal(false);
 export const role = signal(null); // 'imposter' | 'player'
 export const countdown = signal(3);
 export const maxPlayers = signal(10);
+export const numImposters = signal(1);
+export const totalImposters = signal(1);

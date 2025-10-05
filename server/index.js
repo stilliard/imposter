@@ -1,7 +1,7 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const { createRoom, joinRoom, getRoom, removePlayer, selectImposter, isHost } = require('./rooms');
+const { createRoom, joinRoom, getRoom, removePlayer, selectImposters, isHost } = require('./rooms');
 
 const app = express();
 const httpServer = createServer(app);
@@ -48,8 +48,9 @@ io.on('connection', (socket) => {
     // Handle both old format (string) and new format (object)
     const playerName = typeof data === 'string' ? data : data.playerName;
     const maxPlayers = typeof data === 'object' ? data.maxPlayers : undefined;
+    const numImposters = typeof data === 'object' ? data.numImposters : undefined;
 
-    const roomCode = createRoom(playerName, maxPlayers);
+    const roomCode = createRoom(playerName, maxPlayers, numImposters);
     if (!roomCode) {
       socket.emit('error', 'Cannot create room. Server may be at capacity or name is invalid.');
       return;
@@ -107,11 +108,12 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const imposter = selectImposter(roomCode);
+    const imposters = selectImposters(roomCode);
 
     for (const [sid, playerName] of room.sockets) {
       io.to(sid).emit('game-started', {
-        role: playerName === imposter ? 'imposter' : 'player'
+        role: imposters.includes(playerName) ? 'imposter' : 'player',
+        totalImposters: imposters.length
       });
     }
   });

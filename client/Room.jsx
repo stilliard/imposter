@@ -1,4 +1,4 @@
-import { roomCode, players, isHost, currentView, role, countdown } from './signals';
+import { roomCode, players, isHost, currentView, role, countdown, totalImposters } from './signals';
 import { socket } from './socket';
 
 export default function Room() {
@@ -22,11 +22,11 @@ export default function Room() {
   if (currentView.value === 'reveal') {
     return (
       <div class="reveal">
-        <h2>You are {role.value === 'imposter' ? 'the IMPOSTER' : 'a PLAYER'}</h2>
+        <h2>You are {role.value === 'imposter' ? (totalImposters.value > 1 ? 'an IMPOSTER' : 'the IMPOSTER') : 'a PLAYER'}</h2>
         <p class={role.value}>
           {role.value === 'imposter'
-            ? '[!] Eliminate the players without getting caught!'
-            : '[OK] Find the imposter among you!'}
+            ? `[!] Eliminate the players without getting caught!${totalImposters.value > 1 ? ' Work with your fellow imposters!' : ''}`
+            : `[OK] Find the ${totalImposters.value > 1 ? totalImposters.value + ' imposters' : 'imposter'} among you!`}
         </p>
       </div>
     );
