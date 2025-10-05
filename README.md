@@ -1,6 +1,8 @@
-# Imposter Game
+# Imposter - Social Deception Role Assignment
 
-A retro-style, pixel art imposter game built with Preact and Socket.io.
+Add hidden traitor roles to any game. Transform cooperative board games, party games, or group activities by secretly assigning one player as the imposter, thief, saboteur, or traitor.
+
+**Examples**: Play Monopoly with a secret thief stealing money, or any co-op game where one player secretly works against the group.
 
 ## Features
 

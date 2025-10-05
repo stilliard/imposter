@@ -22,10 +22,10 @@ export default function Room() {
   if (currentView.value === 'reveal') {
     return (
       <div class="reveal">
-        <h2>You are {role.value === 'imposter' ? 'the IMPOSTER' : 'CREW'}</h2>
+        <h2>You are {role.value === 'imposter' ? 'the IMPOSTER' : 'a PLAYER'}</h2>
         <p class={role.value}>
           {role.value === 'imposter'
-            ? '[!] Eliminate the crew without getting caught!'
+            ? '[!] Eliminate the players without getting caught!'
             : '[OK] Find the imposter among you!'}
         </p>
       </div>

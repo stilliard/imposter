@@ -111,7 +111,7 @@ io.on('connection', (socket) => {
 
     for (const [sid, playerName] of room.sockets) {
       io.to(sid).emit('game-started', {
-        role: playerName === imposter ? 'imposter' : 'crew'
+        role: playerName === imposter ? 'imposter' : 'player'
       });
     }
   });

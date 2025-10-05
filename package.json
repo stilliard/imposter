@@ -1,7 +1,7 @@
 {
   "name": "imposter",
   "version": "1.0.0",
-  "description": "A retro-style imposter game",
+  "description": "A retro-style imposter picker",
   "main": "server/index.js",
   "scripts": {
     "dev": "vite",
