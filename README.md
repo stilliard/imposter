@@ -72,12 +72,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
-WorkingDirectory=/var/www/imposter
+User=andrew
+WorkingDirectory=/srv/imposter
 Environment="NODE_ENV=production"
-Environment="PORT=3001"
-Environment="CORS_ORIGIN=https://yourdomain.com"
-ExecStart=/usr/bin/npm run server:prod
+ExecStart=/bin/bash -c 'export PATH=/home/andrew/.nvm/versions/node/v20.19.5/bin:$PATH && npm run server:prod'
 Restart=on-failure
 
 [Install]
@@ -95,11 +93,11 @@ sudo systemctl start imposter
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name imposter.stapps.io;
 
     # Serve client build
     location / {
-        root /path/to/imposter/dist;
+        root /srv/imposter/dist;
         try_files $uri $uri/ /index.html;
     }
 
