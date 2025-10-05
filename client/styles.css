@@ -325,8 +325,8 @@ button:disabled {
 
 .waiting {
   text-align: center;
-  color: #16213e;
-  font-size: 0.6rem;
+  color: #8a9aa5;
+  font-size: 0.65rem;
   animation: blink 1s infinite;
 }
 
@@ -497,8 +497,8 @@ button:disabled {
 }
 
 .settings-display {
-  font-size: 0.6rem;
-  color: #16213e;
+  font-size: 0.65rem;
+  color: #8a9aa5;
   margin-bottom: 0.5rem;
 }
 
