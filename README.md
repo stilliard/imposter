@@ -1,6 +1,6 @@
 # Imposter - Social Deception Role Assignment
 
-Add hidden traitor roles to any game. Transform cooperative board games, party games, or group activities by secretly assigning one player as the imposter, thief, saboteur, or traitor.
+Add hidden imposter or traitor roles to any game. Transform cooperative board games, party games, or group activities by secretly assigning one player as the imposter, thief, saboteur, or traitor.
 
 **Examples**: Play Monopoly with a secret thief stealing money, or any co-op game where one player secretly works against the group.
 
