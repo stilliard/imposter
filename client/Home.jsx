@@ -1,4 +1,4 @@
-import { createName, joinName, roomCode, currentView, isHost } from './signals';
+import { createName, joinName, roomCode, currentView, isHost, maxPlayers } from './signals';
 import { socket } from './socket';
 
 const MAX_NAME_LENGTH = 20;
@@ -22,7 +22,10 @@ export default function Home() {
 
   const createRoom = () => {
     if (!createName.value.trim()) return;
-    socket.emit('create-room', createName.value.trim());
+    socket.emit('create-room', {
+      playerName: createName.value.trim(),
+      maxPlayers: maxPlayers.value
+    });
   };
 
   const joinRoom = () => {
@@ -78,6 +81,20 @@ export default function Home() {
             onInput={(e) => createName.value = e.target.value}
             maxLength={MAX_NAME_LENGTH}
           />
+          <select
+            value={maxPlayers.value}
+            onChange={(e) => maxPlayers.value = parseInt(e.target.value)}
+          >
+            <option value={2}>2 players max</option>
+            <option value={3}>3 players max</option>
+            <option value={4}>4 players max</option>
+            <option value={5}>5 players max</option>
+            <option value={6}>6 players max</option>
+            <option value={7}>7 players max</option>
+            <option value={8}>8 players max</option>
+            <option value={9}>9 players max</option>
+            <option value={10}>10 players max</option>
+          </select>
           <button onClick={createRoom}>Create</button>
         </div>
 

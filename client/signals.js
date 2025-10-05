@@ -8,3 +8,4 @@ export const players = signal([]);
 export const isHost = signal(false);
 export const role = signal(null); // 'imposter' | 'crew'
 export const countdown = signal(3);
+export const maxPlayers = signal(10);

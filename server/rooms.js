@@ -36,8 +36,11 @@ function validatePlayerName(name) {
   return true;
 }
 
-function createRoom(playerName) {
+function createRoom(playerName, maxPlayers = MAX_PLAYERS) {
   if (!validatePlayerName(playerName)) return null;
+
+  // Validate maxPlayers (must be between 2 and MAX_PLAYERS)
+  const validMaxPlayers = Math.max(2, Math.min(MAX_PLAYERS, parseInt(maxPlayers) || MAX_PLAYERS));
 
   // Check if we've hit the maximum rooms limit
   if (rooms.size >= MAX_ROOMS) {
@@ -51,7 +54,8 @@ function createRoom(playerName) {
     players: [playerName],
     sockets: new Map(),
     createdAt: Date.now(),
-    lastActivity: Date.now()
+    lastActivity: Date.now(),
+    maxPlayers: validMaxPlayers
   });
   return roomCode;
 }
@@ -62,7 +66,15 @@ function joinRoom(roomCode, playerName, socketId) {
   const room = rooms.get(roomCode);
   if (!room) return null;
   if (!validatePlayerName(playerName)) return null;
-  if (room.players.length >= MAX_PLAYERS) return null;
+
+  // Use room.maxPlayers if it exists, otherwise fall back to MAX_PLAYERS
+  const maxPlayersLimit = room.maxPlayers || MAX_PLAYERS;
+  console.log(`Join attempt: room ${roomCode}, players: ${room.players.length}/${maxPlayersLimit}, new player: ${playerName}`);
+
+  if (room.players.length >= maxPlayersLimit) {
+    console.log(`Room full: ${room.players.length} >= ${maxPlayersLimit}`);
+    return null;
+  }
 
   if (!room.players.includes(playerName)) {
     room.players.push(playerName);

@@ -42,10 +42,14 @@ io.on('connection', (socket) => {
   // Initialize rate limit tracking for this socket
   rateLimitMap.set(socket.id, {});
 
-  socket.on('create-room', (playerName) => {
+  socket.on('create-room', (data) => {
     if (!checkRateLimit(socket, 'create-room', RATE_LIMIT_CREATE)) return;
 
-    const roomCode = createRoom(playerName);
+    // Handle both old format (string) and new format (object)
+    const playerName = typeof data === 'string' ? data : data.playerName;
+    const maxPlayers = typeof data === 'object' ? data.maxPlayers : undefined;
+
+    const roomCode = createRoom(playerName, maxPlayers);
     if (!roomCode) {
       socket.emit('error', 'Cannot create room. Server may be at capacity or name is invalid.');
       return;
