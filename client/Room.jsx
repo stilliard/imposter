@@ -19,6 +19,20 @@ export default function Room() {
     navigator.clipboard.writeText(link);
   };
 
+  const leaveRoom = () => {
+    // Disconnect and reset to home
+    socket.disconnect();
+    socket.connect();
+    currentView.value = 'home';
+    roomCode.value = '';
+    players.value = [];
+    isHost.value = false;
+    role.value = null;
+    revealedImposters.value = [];
+    impostersList.value = [];
+    window.history.pushState({}, '', '/');
+  };
+
   const updateMaxPlayers = (newMax) => {
     socket.emit('update-settings', {
       roomCode: roomCode.value,
@@ -155,6 +169,10 @@ export default function Room() {
           <p class="waiting">Waiting for host to start...</p>
         </div>
       )}
+
+      <button onClick={leaveRoom} class="secondary-btn leave-btn" style="margin-top: 2rem;">
+        Leave Room
+      </button>
     </div>
   );
 }
