@@ -80,9 +80,22 @@ io.on('connection', (socket) => {
       return;
     }
 
-    if (existingRoom.players.includes(playerName)) {
-      socket.emit('error', 'Name already taken');
-      return;
+    // Check if name is taken by a DIFFERENT socket (allow reconnection with same name)
+    const isReconnecting = existingRoom.players.includes(playerName);
+    if (isReconnecting) {
+      // Find and remove old socket for this player (they're reconnecting)
+      for (const [sid, name] of existingRoom.sockets) {
+        if (name === playerName && sid !== socket.id) {
+          existingRoom.sockets.delete(sid);
+          break;
+        }
+      }
+    } else {
+      // New player - check if name is already taken
+      if (existingRoom.players.includes(playerName)) {
+        socket.emit('error', 'Name already taken');
+        return;
+      }
     }
 
     const room = joinRoom(roomCode, playerName, socket.id);

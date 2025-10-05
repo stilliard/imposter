@@ -1,4 +1,4 @@
-import { createName, joinName, roomCode, currentView, isHost, maxPlayers, numImposters } from './signals';
+import { createName, joinName, roomCode, currentView, isHost, maxPlayers, numImposters, playerName } from './signals';
 import { socket } from './socket';
 
 const MAX_NAME_LENGTH = 20;
@@ -22,8 +22,9 @@ export default function Home() {
 
   const createRoom = () => {
     if (!createName.value.trim()) return;
+    playerName.value = createName.value.trim();
     socket.emit('create-room', {
-      playerName: createName.value.trim(),
+      playerName: playerName.value,
       maxPlayers: maxPlayers.value,
       numImposters: numImposters.value
     });
@@ -36,9 +37,10 @@ export default function Home() {
       alert('Invalid room code. Must be 8 alphanumeric characters.');
       return;
     }
+    playerName.value = joinName.value.trim();
     socket.emit('join-room', {
       roomCode: code,
-      playerName: joinName.value.trim()
+      playerName: playerName.value
     });
   };
 

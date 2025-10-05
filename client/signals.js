@@ -2,6 +2,7 @@ import { signal } from '@preact/signals';
 
 export const createName = signal('');
 export const joinName = signal('');
+export const playerName = signal(''); // Current player's name (for reconnection)
 export const roomCode = signal('');
 export const currentView = signal('home'); // 'home' | 'lobby' | 'countdown' | 'reveal'
 export const players = signal([]);

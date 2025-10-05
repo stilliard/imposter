@@ -1,4 +1,4 @@
-import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters } from './signals';
+import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters, playerName } from './signals';
 import { socket } from './socket';
 
 export default function Room() {
@@ -25,6 +25,7 @@ export default function Room() {
     socket.connect();
     currentView.value = 'home';
     roomCode.value = '';
+    playerName.value = '';
     players.value = [];
     isHost.value = false;
     role.value = null;

@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters } from './signals';
+import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters, playerName } from './signals';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
@@ -7,9 +7,24 @@ export const socket = io(SOCKET_URL, {
   withCredentials: true
 });
 
+// Handle reconnection - auto-rejoin room if we were in one
+socket.on('connect', () => {
+  console.log('Socket connected:', socket.id);
+
+  // If we were in a room and have player info, try to rejoin
+  if (roomCode.value && playerName.value && currentView.value !== 'home') {
+    console.log('Reconnecting to room:', roomCode.value, 'as', playerName.value);
+    socket.emit('join-room', {
+      roomCode: roomCode.value,
+      playerName: playerName.value
+    });
+  }
+});
+
 // Event handler functions (for proper cleanup)
 const onRoomCreated = (data) => {
   roomCode.value = data.roomCode;
+  playerName.value = data.playerName;
   isHost.value = true;
   players.value = [data.playerName];
   maxPlayers.value = data.maxPlayers || 10;
