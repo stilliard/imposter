@@ -37,7 +37,7 @@ function validatePlayerName(name) {
   return true;
 }
 
-function createRoom(playerName, maxPlayers = MAX_PLAYERS, numImposters = 1) {
+function createRoom(playerName, maxPlayers = MAX_PLAYERS, numImposters = 1, requestedRoomCode = null) {
   if (!validatePlayerName(playerName)) return null;
 
   // Validate maxPlayers (must be between 2 and MAX_PLAYERS)
@@ -52,7 +52,19 @@ function createRoom(playerName, maxPlayers = MAX_PLAYERS, numImposters = 1) {
     return null;
   }
 
-  const roomCode = generateRoomCode();
+  // Use requested room code if provided and valid, otherwise generate new one
+  let roomCode;
+  if (requestedRoomCode && validateRoomCode(requestedRoomCode)) {
+    // Check if room code already exists
+    if (rooms.has(requestedRoomCode)) {
+      console.log('Requested room code already exists');
+      return null;
+    }
+    roomCode = requestedRoomCode;
+  } else {
+    roomCode = generateRoomCode();
+  }
+
   rooms.set(roomCode, {
     host: playerName,
     players: [playerName],

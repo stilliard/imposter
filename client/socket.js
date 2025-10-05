@@ -7,6 +7,9 @@ export const socket = io(SOCKET_URL, {
   withCredentials: true
 });
 
+// Track if we're currently trying to auto-reconnect
+let isAutoReconnecting = false;
+
 // Handle reconnection - auto-rejoin room if we were in one
 socket.on('connect', () => {
   console.log('Socket connected:', socket.id);
@@ -14,6 +17,7 @@ socket.on('connect', () => {
   // If we were in a room and have player info, try to rejoin
   if (roomCode.value && playerName.value && currentView.value !== 'home') {
     console.log('Reconnecting to room:', roomCode.value, 'as', playerName.value);
+    isAutoReconnecting = true;
     socket.emit('join-room', {
       roomCode: roomCode.value,
       playerName: playerName.value
@@ -31,6 +35,7 @@ const onRoomCreated = (data) => {
   maxPlayers.value = data.maxPlayers || 10;
   numImposters.value = data.numImposters || 1;
   currentView.value = 'lobby';
+  isAutoReconnecting = false; // Successfully created/recreated room
 
   // Update URL so host can easily share by copying from address bar
   window.history.pushState({}, '', `?room=${data.roomCode}`);
@@ -44,6 +49,7 @@ const onRoomJoined = (data) => {
   maxPlayers.value = data.maxPlayers || 10;
   numImposters.value = data.numImposters || 1;
   currentView.value = 'lobby';
+  isAutoReconnecting = false; // Successfully rejoined
 };
 
 const onPlayersUpdated = (data) => {
@@ -92,6 +98,20 @@ const onGameStarted = (data) => {
 };
 
 const onError = (message) => {
+  // If we're auto-reconnecting as host and room not found, recreate it with same code
+  if (isAutoReconnecting && message === 'Room not found' && isHost.value) {
+    console.log('Room not found during reconnect. Recreating as host with code:', roomCode.value);
+    isAutoReconnecting = false;
+    socket.emit('create-room', {
+      playerName: playerName.value,
+      maxPlayers: maxPlayers.value,
+      numImposters: numImposters.value,
+      roomCode: roomCode.value
+    });
+    return;
+  }
+
+  isAutoReconnecting = false;
   alert(message);
 };
 

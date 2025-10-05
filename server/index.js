@@ -51,10 +51,11 @@ io.on('connection', (socket) => {
     const playerName = typeof data === 'string' ? data : data.playerName;
     const maxPlayers = typeof data === 'object' ? data.maxPlayers : undefined;
     const numImposters = typeof data === 'object' ? data.numImposters : undefined;
+    const requestedRoomCode = typeof data === 'object' ? data.roomCode : undefined;
 
-    const roomCode = createRoom(playerName, maxPlayers, numImposters);
+    const roomCode = createRoom(playerName, maxPlayers, numImposters, requestedRoomCode);
     if (!roomCode) {
-      socket.emit('error', 'Cannot create room. Server may be at capacity or name is invalid.');
+      socket.emit('error', 'Cannot create room. Server may be at capacity, name is invalid, or room code already exists.');
       return;
     }
 
