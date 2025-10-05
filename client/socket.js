@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters, playerName } from './signals';
+import { roomCode, currentView, players, isHost, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters, playerName, hostName } from './signals';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
@@ -25,6 +25,7 @@ socket.on('connect', () => {
 const onRoomCreated = (data) => {
   roomCode.value = data.roomCode;
   playerName.value = data.playerName;
+  hostName.value = data.hostName;
   isHost.value = true;
   players.value = [data.playerName];
   maxPlayers.value = data.maxPlayers || 10;
@@ -38,6 +39,7 @@ const onRoomCreated = (data) => {
 const onRoomJoined = (data) => {
   roomCode.value = data.roomCode;
   players.value = data.players;
+  hostName.value = data.hostName;
   isHost.value = data.isHost || false;
   maxPlayers.value = data.maxPlayers || 10;
   numImposters.value = data.numImposters || 1;

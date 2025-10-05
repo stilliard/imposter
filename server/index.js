@@ -65,6 +65,7 @@ io.on('connection', (socket) => {
     socket.emit('room-created', {
       roomCode,
       playerName,
+      hostName: room.host,
       maxPlayers: room.maxPlayers,
       numImposters: room.numImposters
     });
@@ -109,6 +110,7 @@ io.on('connection', (socket) => {
     socket.emit('room-joined', {
       roomCode,
       players: room.players,
+      hostName: room.host,
       maxPlayers: room.maxPlayers,
       numImposters: room.numImposters,
       isHost: isHost(roomCode, playerName)

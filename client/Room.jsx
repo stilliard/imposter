@@ -1,4 +1,4 @@
-import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters, playerName } from './signals';
+import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList, revealedImposters, maxPlayers, numImposters, playerName, hostName } from './signals';
 import { socket } from './socket';
 
 export default function Room() {
@@ -26,6 +26,7 @@ export default function Room() {
     currentView.value = 'home';
     roomCode.value = '';
     playerName.value = '';
+    hostName.value = '';
     players.value = [];
     isHost.value = false;
     role.value = null;
@@ -104,7 +105,9 @@ export default function Room() {
         <h3>Players ({players.value.length})</h3>
         <ul>
           {players.value.map(player => (
-            <li key={player}>{player}</li>
+            <li key={player}>
+              {player}{player === hostName.value ? ' (host)' : ''}
+            </li>
           ))}
         </ul>
       </div>
