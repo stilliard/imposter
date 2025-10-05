@@ -54,7 +54,7 @@ npm run server:prod
 ### Digital Ocean Setup
 
 1. **Create Droplet** (Ubuntu recommended)
-2. **Install Node.js** (v18+)
+2. **Install Node.js** (v20+)
 3. **Clone repo and install dependencies**
 4. **Set environment variables**
 5. **Build client**: `npm run build`
