@@ -97,7 +97,8 @@ io.on('connection', (socket) => {
       roomCode,
       players: room.players,
       maxPlayers: room.maxPlayers,
-      numImposters: room.numImposters
+      numImposters: room.numImposters,
+      isHost: isHost(roomCode, playerName)
     });
     socket.to(roomCode).emit('players-updated', { players: room.players });
   });

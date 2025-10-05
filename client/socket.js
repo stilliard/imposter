@@ -23,6 +23,7 @@ const onRoomCreated = (data) => {
 const onRoomJoined = (data) => {
   roomCode.value = data.roomCode;
   players.value = data.players;
+  isHost.value = data.isHost || false;
   maxPlayers.value = data.maxPlayers || 10;
   numImposters.value = data.numImposters || 1;
   currentView.value = 'lobby';
