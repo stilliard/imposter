@@ -4,6 +4,7 @@ import preact from '@preact/preset-vite';
 export default defineConfig({
   plugins: [preact()],
   root: 'client',
+  envDir: '..',
   build: {
     outDir: '../dist',
     emptyOutDir: true
