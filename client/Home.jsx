@@ -58,6 +58,12 @@ export default function Home() {
               placeholder="Your name"
               value={joinName.value}
               onInput={(e) => joinName.value = e.target.value}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  joinRoom();
+                  return;
+                }
+              }}
               maxLength={MAX_NAME_LENGTH}
             />
             <button onClick={joinRoom}>Join</button>
@@ -80,6 +86,11 @@ export default function Home() {
             placeholder="Your name"
             value={createName.value}
             onInput={(e) => createName.value = e.target.value}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                createRoom();
+              }
+            }}
             maxLength={MAX_NAME_LENGTH}
           />
           <select
