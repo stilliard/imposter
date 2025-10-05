@@ -15,6 +15,9 @@ const onRoomCreated = (data) => {
   maxPlayers.value = data.maxPlayers || 10;
   numImposters.value = data.numImposters || 1;
   currentView.value = 'lobby';
+
+  // Update URL so host can easily share by copying from address bar
+  window.history.pushState({}, '', `?room=${data.roomCode}`);
 };
 
 const onRoomJoined = (data) => {
