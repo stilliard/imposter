@@ -1,9 +1,17 @@
-import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList } from './signals';
+import { roomCode, players, isHost, currentView, role, countdown, totalImposters, impostersList, revealedImposters } from './signals';
 import { socket } from './socket';
 
 export default function Room() {
   const startGame = () => {
     socket.emit('start-game', roomCode.value);
+  };
+
+  const revealImposters = () => {
+    socket.emit('reveal-imposters', roomCode.value);
+  };
+
+  const playAgain = () => {
+    socket.emit('play-again', roomCode.value);
   };
 
   const copyLink = () => {
@@ -33,6 +41,23 @@ export default function Room() {
             Fellow {impostersList.value.length > 1 ? 'imposters' : 'imposter'}: {impostersList.value.join(', ')}
           </p>
         )}
+        {revealedImposters.value.length > 0 && (
+          <p style="margin-top: 2rem; font-size: 0.8rem; color: #ff6680; border: 2px solid #ff0033; padding: 1rem;">
+            {revealedImposters.value.length > 1 ? 'The imposters were' : 'The imposter was'}: {revealedImposters.value.join(', ')}
+          </p>
+        )}
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+          {revealedImposters.value.length === 0 && (
+            <button onClick={revealImposters} class="secondary-btn" style="flex: 1;">
+              Reveal Imposters
+            </button>
+          )}
+          {isHost.value && (
+            <button onClick={playAgain} style="flex: 1;">
+              Play Again
+            </button>
+          )}
+        </div>
       </div>
     );
   }

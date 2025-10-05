@@ -12,3 +12,4 @@ export const maxPlayers = signal(10);
 export const numImposters = signal(1);
 export const totalImposters = signal(1);
 export const impostersList = signal([]);
+export const revealedImposters = signal([]);

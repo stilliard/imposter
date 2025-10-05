@@ -109,6 +109,7 @@ io.on('connection', (socket) => {
     }
 
     const imposters = selectImposters(roomCode);
+    room.imposters = imposters; // Store for reveal later
 
     for (const [sid, playerName] of room.sockets) {
       const isImposter = imposters.includes(playerName);
@@ -119,6 +120,32 @@ io.on('connection', (socket) => {
         imposters: isImposter ? imposters.filter(name => name !== playerName) : []
       });
     }
+  });
+
+  socket.on('reveal-imposters', (roomCode) => {
+    const room = getRoom(roomCode);
+    if (!room || !room.imposters) return;
+
+    io.to(roomCode).emit('imposters-revealed', {
+      imposters: room.imposters
+    });
+  });
+
+  socket.on('play-again', (roomCode) => {
+    const room = getRoom(roomCode);
+    if (!room) return;
+
+    // Validate that the socket is the host
+    const playerName = room.sockets.get(socket.id);
+    if (!isHost(roomCode, playerName)) {
+      socket.emit('error', 'Only the host can restart the game');
+      return;
+    }
+
+    // Clear game state
+    delete room.imposters;
+
+    io.to(roomCode).emit('game-reset');
   });
 
   socket.on('disconnect', () => {
